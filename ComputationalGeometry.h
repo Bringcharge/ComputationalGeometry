@@ -50,7 +50,11 @@ Vector rotate_Point(const Vector &p, double a)			//P向量逆时针旋转a(弧度)
 	double tx = p.x, ty = p.y;							//t是原有值，不能随便乱改引用p
 	return Vector(tx*cos(a) - ty*sin(a), tx*sin(a) + ty*cos(a));		//x'=x*cos(a)-y*sin(a),y'=x*sin(a)+y*cos(a)
 }
-
+Point rotate_round_Point(const Point &p, const Point &o, double a)		//点p绕着点o逆时针旋转a的弧度
+{
+	double tx = (p - o).x, ty = (p - o).y;								//一个点去除它本身的圆心，然后旋转
+	return Vector(tx*cos(a) - ty*sin(a) +o.x, tx*sin(a) + ty*cos(a) + o.y);		//返还旋转后的点再加上圆心
+}
 /*至此为止，点和向量已经定义完成*/
 
 struct Line					//定义线段类
@@ -100,6 +104,20 @@ Line move_d(Line a, const double &len)					//将直线a沿法线（a->b的左侧)方向平移l
 	d = d / d.norm();
 	d = rotate_Point(d, Pi / 2.0);
 	return Line(a.a + d*len, a.b + d*len);				//懒得解释了，随便看看就好。
+}
+double Vector_angle(Vector k)						//从弧中移植出来的函数，计算一个向量的角度
+{
+	Point b = k, a(1, 0);						//b是k,a是一个基准单位向量
+	double cosx = a*b / (a.norm()*b.norm());	//假设偏转角是x，我们算一个cos(x)
+	double sinx = cross(a, b) / (a.norm()*b.norm());	//a×b，如果b在a左侧就是正，否则是负
+	if (sinx >= 0 && cosx >= 0)					//明显的第一象限
+		return acos(cosx);
+	else if (sinx >= 0 && cosx < 0)				//第二象限
+		return acos(cosx);
+	else if (sinx < 0 && cosx < 0)				//第三象限，此时sinx小于0，那么我们用π加上sinx的反三角函数的绝对值
+		return Pi - asin(sinx);
+	else										//第四象限，满的值加上小于0的值得到弧度
+		return Pi * 2 + asin(sinx);
 }
 /*到此，红书的线段类已经结束了，接下来是多边形类，虽然本工程不需要这个类，但是先写上去吧*/
 const int maxnn = 100;						//多边形最多有多少个顶点，感觉100在竞赛中是不够用的，所以是可以调整的
@@ -188,7 +206,7 @@ int cirecle_cross_Line(Point a, Point b, Point o, double r, Point ret[])
 	return num;
 }
 
-struct Arc
+struct Arc			//圆弧
 {
 	Point o;									//圆心
 	double r;									//半径
