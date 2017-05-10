@@ -1,96 +1,120 @@
-double max(double a, double b)						//重载一次max
+//MK: Prevent the file from being included twice.
+#ifndef COMPUTATIONAL_GEOMETRY_H
+#define COMPUTATIONAL_GEOMETRY_H
+
+//MK: scanf is needed.
+#include <cstdio>
+
+//MK: math functions are needed.
+#include <cmath>
+
+//MK: A function should not be defined in a header file if it is neither inline nor template.
+//    Otherwise, some linkage errors may possibly occur.
+
+//MK: max and min function from C++ standard header <algorithm> is prefered.
+//    If there's any reason that you don't want to include <algorithm>, make them inline.
+//#include <algorithm>
+//using std::max;
+//using std::min;
+
+inline double max(double a, double b)						//重载一次max
 {
 	if (a > b) return a;
 	return b;
 }
-double min(double a, double b)
+inline double min(double a, double b)
 {
 	if (a > b) return  b;
 	return a;
 }
+
+
+
 const double Pi = acos(-1.0);						//Pi是π
 const double eps = 1e-8;							//接近0的一个误差允许范围
-int cmp(double x)									//计算几何误差修正函数
+inline int cmp(double x)									//计算几何误差修正函数
 {
 	if (fabs(x) < eps) return 0;
-	if (x>0) return 1;
+	if (x > 0) return 1;
 	return -1;
 }
 inline double sqr(double x) { return x*x; }			//平方
 typedef struct  Point			//点坐标
 {
 	double x, y;
-	Point(){}
-	Point(double a, double b) :x(a), y(b){}
-	void input(){ scanf("%lf%lf", &x, &y); }	//没什么用的读入
+	Point() {}
+	Point(double a, double b) :x(a), y(b) {}
+	void input() { scanf("%lf%lf", &x, &y); }	//没什么用的读入
 	/*对向量/点的加减，向量常数乘除，向量点乘，向量/点的比较进行了重载*/
-	friend Point operator + (const Point &a, const Point &b){ return Point(a.x + b.x, a.y + b.y); }
-	friend Point operator - (const Point &a, const Point &b){ return Point(a.x - b.x, a.y - b.y); }
-	friend bool operator == (const Point &a, const Point &b){ return (!cmp(a.x - b.x)) && (!cmp(a.y - b.y)); }
-	friend Point operator * (const Point &a, const double &b){ return Point(a.x * b, a.y * b); }
-	friend Point operator * (const double &a, const Point &b){ return Point(a * b.x, a * b.y); }
-	friend double operator * (const Point &a, const Point &b){ return (a.x * b.x + a.y * b.y); }
-	friend Point operator / (const Point &a, const double &b){ return Point(a.x / b, a.y / b); }
-	double norm(){ return sqrt(sqr(x) + sqr(y)); }				//这个是求个模
+	friend Point operator + (const Point &a, const Point &b) { return Point(a.x + b.x, a.y + b.y); }
+	friend Point operator - (const Point &a, const Point &b) { return Point(a.x - b.x, a.y - b.y); }
+	friend bool operator == (const Point &a, const Point &b) { return (!cmp(a.x - b.x)) && (!cmp(a.y - b.y)); }
+	friend Point operator * (const Point &a, const double &b) { return Point(a.x * b, a.y * b); }
+	friend Point operator * (const double &a, const Point &b) { return Point(a * b.x, a * b.y); }
+	friend double operator * (const Point &a, const Point &b) { return (a.x * b.x + a.y * b.y); }
+	friend Point operator / (const Point &a, const double &b) { return Point(a.x / b, a.y / b); }
+	double norm() { return sqrt(sqr(x) + sqr(y)); }				//这个是求个模
 } Vector;
-double cross(const Point &a, const Point &b)					//叉乘
+
+//MK: Changed All these to inline.
+inline double cross(const Point &a, const Point &b)					//叉乘
 {
 	return  a.x*b.y - a.y*b.x;
 }
-double det(const Point &a, const Point &b)						//这两个函数是叉乘，det是行列式的意思，和上面那个一样
+inline double det(const Point &a, const Point &b)						//这两个函数是叉乘，det是行列式的意思，和上面那个一样
 {
 	return  a.x*b.y - a.y*b.x;
 }
-double dist(const Point &a, const Point &b)						//计算两点距离
+inline double dist(const Point &a, const Point &b)						//计算两点距离
 {
 	return (a - b).norm();		//直接返回模就好
 }
-Vector rotate_Point(const Vector &p, double a)			//P向量逆时针旋转a(弧度)
+inline Vector rotate_Point(const Vector &p, double a)			//P向量逆时针旋转a(弧度)
 {
 	double tx = p.x, ty = p.y;							//t是原有值，不能随便乱改引用p
 	return Vector(tx*cos(a) - ty*sin(a), tx*sin(a) + ty*cos(a));		//x'=x*cos(a)-y*sin(a),y'=x*sin(a)+y*cos(a)
 }
-Point rotate_round_Point(const Point &p, const Point &o, double a)		//点p绕着点o逆时针旋转a的弧度
+inline Point rotate_round_Point(const Point &p, const Point &o, double a)		//点p绕着点o逆时针旋转a的弧度
 {
 	double tx = (p - o).x, ty = (p - o).y;								//一个点去除它本身的圆心，然后旋转
-	return Vector(tx*cos(a) - ty*sin(a) +o.x, tx*sin(a) + ty*cos(a) + o.y);		//返还旋转后的点再加上圆心
+	return Vector(tx*cos(a) - ty*sin(a) + o.x, tx*sin(a) + ty*cos(a) + o.y);		//返还旋转后的点再加上圆心
 }
 /*至此为止，点和向量已经定义完成*/
 
 struct Line					//定义线段类
 {
 	Point a, b;
-	Line(){}
-	Line(Point x, Point y) :a(x), b(y){}
+	Line() {}
+	Line(Point x, Point y) :a(x), b(y) {}
 };
-Line Point_make_Line(Point a, Point b)				//给两个点，返还它们组成的线段。
+inline Line Point_make_Line(Point a, Point b)				//给两个点，返还它们组成的线段。
 {
 	return Line(a, b);
 }
-double dis_Point_segment(Point p, Point s, Point t)				//求点p到线段st的距离
+inline double dis_Point_segment(Point p, Point s, Point t)				//求点p到线段st的距离
 {
 	if (cmp((p - s)*(t - s)) < 0) return (p - s).norm();		//p的垂足在st的s的外侧（s指向p,t两点的直线夹角大于90°）
 	if (cmp((p - t)*(s - t)) < 0) return (p - t).norm();		//p的垂足在st的t的外侧（t指向p,s两点的直线夹角大于90°）
 	return fabs(cross(s - p, t - p) / dist(s, t));				//p的垂足在st内，用三角形面积的2倍除以线段长
 }
-double dis_Point_segment(Point p, Line l)				//求点p到线段l的距离,重载一次
+inline double dis_Point_segment(Point p, Line l)				//求点p到线段l的距离,重载一次
 {
 	return dis_Point_segment(p, l.a, l.b);
 }
-Point Point_proj_Line(Point p, Point s, Point t)		//求p到直线st的垂足，想确定垂足是不是在线段上调用下方Point_on_segment就好
+inline Point Point_proj_Line(Point p, Point s, Point t)		//求p到直线st的垂足，想确定垂足是不是在线段上调用下方Point_on_segment就好
 {
 	double r = (t - s)*(p - s) / ((t - s)* (t - s));			//sp在st上的投影长度除以st长度
 	return s + r*(t - s);								//s是起始点，沿着s->t方向移动了r的点
 }
-bool Point_on_segment(Point p, Point s, Point t)		//点p在线段st上（包括端点处）返回true
+inline bool Point_on_segment(Point p, Point s, Point t)		//点p在线段st上（包括端点处）返回true
 {
 	return (cmp(det(p - s, t - s)) == 0) && (cmp((p - s)*(p - t)) <= 0);	//叉乘为0，且p在s,t中间（端点上）
 }
-bool parallel(Line a, Line b)							//两直线是否平行，直线平行返还true
+inline bool parallel(Line a, Line b)							//两直线是否平行，直线平行返还true
 {
 	return !cmp(det(a.a - a.b, b.a - b.b));				//a的向量与b的向量叉乘不为0
 }
-bool Line_make_Point(Line a, Line b, Point &res)		//两直线相交的交点，若不相交返还false，交点存放在res中
+inline bool Line_make_Point(Line a, Line b, Point &res)		//两直线相交的交点，若不相交返还false，交点存放在res中
 {
 	if (parallel(a, b)) return false;
 	double s1 = det(a.a - b.a, b.b - b.a);
@@ -98,14 +122,14 @@ bool Line_make_Point(Line a, Line b, Point &res)		//两直线相交的交点，若不相交返
 	res = (s1*a.b - s2*a.a) / (s1 - s2);				//详情看刘汝佳的大白的 P257 有原理。
 	return true;
 }
-Line move_d(Line a, const double &len)					//将直线a沿法线（a->b的左侧)方向平移len的距离得到新的直线
+inline Line move_d(Line a, const double &len)					//将直线a沿法线（a->b的左侧)方向平移len的距离得到新的直线
 {
 	Vector d = a.b - a.a;
 	d = d / d.norm();
 	d = rotate_Point(d, Pi / 2.0);
 	return Line(a.a + d*len, a.b + d*len);				//懒得解释了，随便看看就好。
 }
-double Vector_angle(Vector k)						//从弧中移植出来的函数，计算一个向量的角度
+inline double Vector_angle(Vector k)						//从弧中移植出来的函数，计算一个向量的角度
 {
 	Point b = k, a(1, 0);						//b是k,a是一个基准单位向量
 	double cosx = a*b / (a.norm()*b.norm());	//假设偏转角是x，我们算一个cos(x)
@@ -125,7 +149,7 @@ struct Polygon
 {
 	int n;								//该多边形有多少个顶点
 	Point a[maxnn];
-	Polygon(){}
+	Polygon() {}
 	double perimeter()					//计算周长函数
 	{
 		double sum = 0;					//总和
@@ -168,11 +192,11 @@ struct Polygon
 //abs就是.norm,就是模长的意思
 //Crosspet好像是两条线的交点  详情参考红书135
 //mysqrt是把0以下的东西返还0，弄掉虚数
-double mysqrt(double n)
+inline double mysqrt(double n)
 {
 	return sqrt(max(0.0, n));
 }
-int cirecle_cross_Line(Point a, Point b, Point o, double r, Point ret[])
+inline int cirecle_cross_Line(Point a, Point b, Point o, double r, Point ret[])
 {
 	/*a,b代表线段a->b，o是圆心，r是半径，ret是计算出来的交点，保存在数组中，返回值是有多少个交点*/
 	//|a+t(b-a)-o|=r 然后两边平方就好，左边是一个向量的模不能直接平方向量，是将向量的x坐标平方加上y向量的平方
@@ -213,14 +237,14 @@ struct Arc			//圆弧
 	double b, e;								//起始弧度到终止弧度，按照大于0的计算好了
 	/*弧度的特点：右端未0，逆时针旋转，小于2π*/
 	Arc() {}
-	Arc(Point k, double f, double be, double ee) :o(k), r(f), b(be), e(ee){}	//重载构造
+	Arc(Point k, double f, double be, double ee) :o(k), r(f), b(be), e(ee) {}	//重载构造
 
 	double Point_in_Cirecle(Point k)			//点在圆内或者在圆上
 	{
 		if ((k - o).norm() <= r) return 1;		//好像这次用不到来着
 		return 0;
 	}
-	
+
 	double angle(Point k)						//计算o->k与x轴的弧度
 	{
 		Point b = k - o, a(1, 0);				//b是o->k,a是一个基准单位向量
@@ -253,3 +277,7 @@ struct Arc			//圆弧
 		}
 	}
 };
+
+
+
+#endif //COMPUTATIONAL_GEOMETRY_H
